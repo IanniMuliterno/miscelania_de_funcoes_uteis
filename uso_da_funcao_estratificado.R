@@ -66,82 +66,12 @@ stratified <- function(df, group, size, select = NULL,
   }
 }
 
-dt <- fread("/garagem/mangos/metricas_priced/extracao_cpfs.psv.gz")
-
-dt[,idade := as.numeric(idade)]
-dt[,idade := abs(idade)]
-
-prop.table(table(dt$mangos))
-
-prop.table(table(dt[mangos == 0]$classe_social))
-prop.table(table(dt[mangos == 1]$classe_social))
-
-
-prop.table(table(dt[mangos == 0]$sexo))
-prop.table(table(dt[mangos == 1]$sexo))
-  
-
-summary(dt[mangos == 0]$idade)
-summary(dt[mangos == 1]$idade)
-
-# dt[!is.na(idade)] %>% 
-# ggplot() +
-#   aes(idade,colour = as.character(mangos)) +
-#   geom_histogram(alpha=I(.2))
-
-hist(dt[mangos == 0]$idade)
-hist(dt[mangos == 1]$idade)
 
 N = 100
 myData <- data.frame(a=1:N,b=round(rnorm(N),2),group=round(rnorm(N,4),0))
+    
+# distribuição por grupo na população    
 (prop.table(table(myData$group)))
 recebe_amostra <- stratified(myData,"group",.3)
-
+#distribuição por grupo na amostra
 prop.table(table(recebe_amostra$group))
-
-#5240 mulheres
-
-#retirar amostra de 
-
-dt[,faixa_etaria := cut(idade,c(seq(25,70,by = 10)))]
-dt[idade <= 25, faixa_etaria := "(0,25]"]
-dt[idade > 65, faixa_etaria := "(65,]"]
-table(dt$faixa_etaria)
-
-# dicionario_faixa <- dt[!is.na(faixa_etaria)][,.N,faixa_etaria][order(faixa_etaria)]
-# dicionario_faixa[,code := c(2:5,1,6)]
-# dicionario_faixa[order(code)]
-# dicionario_faixa[,N := NULL]
-# 
-# dt[dicionario_faixa, code := code, on = "faixa_etaria"]
-take_sample <- dt[mangos == 0][!is.na(idade)]
-
-prop.table(table(take_sample$sexo))
-prop.table(table(dt[mangos == 0]$sexo))
-
-prop.table(table(take_sample$classe_social))
-prop.table(table(dt[mangos == 0]$classe_social))
-
-prop_mulheres <- round(nrow(dt[mangos == 1])*nrow(dt[mangos == 1 & sexo != "M"])/nrow(dt[mangos == 1]))/
-                 nrow(dt[sexo == "F" & mangos == 0])
-#prop_mulheres <- round(prop_mulheres,4)
-
-mulheres <- stratified(as.data.frame(take_sample[sexo != "F"]),"faixa_etaria",prop_mulheres)
-
-prop_homens <- round(nrow(dt[mangos == 1])*nrow(dt[mangos == 1 & sexo != "F"])/nrow(dt[mangos == 1]))/
-  nrow(dt[sexo == "M" & mangos == 0])
-
-homens <- stratified(as.data.frame(take_sample[sexo == "M"]),"faixa_etaria",prop_homens)
-
-prop.table(table(homens$classe_social))
-prop.table(table(dt[mangos == 1]$classe_social))
-
-prop.table(table(homens$faixa_etaria))
-prop.table(table(dt[mangos == 1]$faixa_etaria))
-
-
-prop.table(table(mulheres$classe_social))
-prop.table(table(dt[mangos == 1]$classe_social))
-
-prop.table(table(mulheres$faixa_etaria))
-prop.table(table(dt[mangos == 1]$faixa_etaria))
